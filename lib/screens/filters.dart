@@ -1,27 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:meals_app/provider/filters_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum Filter {
-  glutenFree,
-  lactoseFree,
-  vegetarian,
-  vegan,
-}
-
-class FiltersScreen extends StatefulWidget {
+class FiltersScreen extends ConsumerStatefulWidget {
   const FiltersScreen({
     super.key,
-    required this.currentFilters,
   });
 
-  final Map<Filter, bool> currentFilters;
-
   @override
-  State<FiltersScreen> createState() {
+  ConsumerState<FiltersScreen> createState() {
     return _FiltersState();
   }
 }
 
-class _FiltersState extends State<FiltersScreen> {
+class _FiltersState extends ConsumerState<FiltersScreen> {
   var _glutenFreeFilterSet = false;
   var _lactoseFreeFilterSet = false;
   var _vetetarianFilterSet = false;
@@ -30,10 +22,11 @@ class _FiltersState extends State<FiltersScreen> {
   @override
   void initState() {
     super.initState();
-    _glutenFreeFilterSet = widget.currentFilters[Filter.glutenFree]!;
-    _lactoseFreeFilterSet = widget.currentFilters[Filter.lactoseFree]!;
-    _vetetarianFilterSet = widget.currentFilters[Filter.vegetarian]!;
-    _veganFilterSet = widget.currentFilters[Filter.vegan]!;
+    final activeFilter = ref.read(filtersProvider);
+    _glutenFreeFilterSet = activeFilter[Filter.glutenFree]!;
+    _lactoseFreeFilterSet = activeFilter[Filter.lactoseFree]!;
+    _vetetarianFilterSet = activeFilter[Filter.vegetarian]!;
+    _veganFilterSet = activeFilter[Filter.vegan]!;
   }
 
   @override
@@ -46,12 +39,13 @@ class _FiltersState extends State<FiltersScreen> {
         canPop: false,
         onPopInvokedWithResult: (bool didPop, dynamic result) {
           if (didPop) return;
-          Navigator.of(context).pop({
+          ref.read(filtersProvider.notifier).setFilters({
             Filter.glutenFree: _glutenFreeFilterSet,
             Filter.lactoseFree: _lactoseFreeFilterSet,
             Filter.vegetarian: _vetetarianFilterSet,
             Filter.vegan: _veganFilterSet,
           });
+          Navigator.pop(context);
         },
         child: Column(
           children: [
